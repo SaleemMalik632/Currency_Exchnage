@@ -40,6 +40,11 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cors());
 
 /* ROUTES */
+app.use("/", (req, res) => {
+  res.send("Welcome to the E-commerce API");
+});
+
+
 app.use("/client", clientRoutes);
 app.use("/general", generalRoutes);
 app.use("/management", managementRoutes);
