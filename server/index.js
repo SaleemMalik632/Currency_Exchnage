@@ -1,10 +1,13 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import helmet from 'helmet';
-import morgan from 'morgan';
+import express from "express";
+import bodyParser from "body-parser";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import helmet from "helmet";
+import morgan from "morgan";
+import path from "path";
+
+// Importing routes
 import clientRoutes from "./routes/client.js";
 import generalRoutes from "./routes/general.js";
 import managementRoutes from "./routes/management.js";
@@ -13,64 +16,80 @@ import omanToTZSRoutes from "./routes/omanToTZSRoutes.js";
 import tzsToOMRRoutes from "./routes/tzaToOmanRoutes.js";
 import AccountDetailsOMR from "./routes/AccountDetailsOMR.js";
 import AccountDetailsTZS from "./routes/AccountDetailsTZS.js";
-import  AddBankAccount  from './routes/AddAccount.js';
-import  AddTransection  from './routes/AddTransection.js';
+import AddBankAccount from "./routes/AddAccount.js";
+import AddTransection from "./routes/AddTransection.js";
 
-// data imports
+// Importing data and models
 import User from "./models/User.js";
 import Product from "./models/Product.js";
-import ProductStat from './models/ProductStat.js';
-import Transaction from './models/Transaction.js';
-import OverallStat from './models/OverallStat.js';
-import AffiliateStat from './models/AffiliateStat.js';
-
+import ProductStat from "./models/ProductStat.js";
+import Transaction from "./models/Transaction.js";
+import OverallStat from "./models/OverallStat.js";
+import AffiliateStat from "./models/AffiliateStat.js";
 import {
-    dataUser, dataProduct, dataProductStat, dataTransaction, dataOverallStat, dataAffiliateStat
-  } from "./data/index.js";
+  dataUser,
+  dataProduct,
+  dataProductStat,
+  dataTransaction,
+  dataOverallStat,
+  dataAffiliateStat,
+} from "./data/index.js";
 
 /* CONFIGURATION */
 dotenv.config();
 const app = express();
+const __dirname = path.resolve();
+
+// Middleware
 app.use(express.json());
 app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({policy: "cross-origin"}));
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
-/* ROUTES */
-app.use("/", (req, res) => {
-  res.send("Welcome to the E-commerce API");
-});
+// Static file serving (optional, for frontend or assets)
+app.use(express.static(path.join(__dirname, "public")));
 
+/* ROUTES */
+app.get("/", (req, res) => {
+  res.send("Welcome to the Currency Exchange API!");
+});
 
 app.use("/client", clientRoutes);
 app.use("/general", generalRoutes);
 app.use("/management", managementRoutes);
-app.use("/sales", salesRoutes); 
-// Use the separate routes
-app.use('/omanToTZS', omanToTZSRoutes);
-app.use('/tzsToOMR', tzsToOMRRoutes);
+app.use("/sales", salesRoutes);
+app.use("/omanToTZS", omanToTZSRoutes);
+app.use("/tzsToOMR", tzsToOMRRoutes);
 app.use("/AccountDetailsOMR", AccountDetailsOMR);
 app.use("/AccountDetailsTZS", AccountDetailsTZS);
 app.use("/accounts", AddBankAccount);
 app.use("/transactions", AddTransection);
 
+/* CATCH-ALL ROUTE (404 Handler) */
+app.use((req, res) => {
+  res.status(404).send("Route not found");
+});
 
- 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 5002;
-mongoose.connect(process.env.MONGO_URL,{useNewUrlParser: true,useUnifiedTopology: true,}).then(() => {
-    app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
-    console.log('Connected to MongoDB');
-     /* ONLY ADD DATA ONE TIME */
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server running on Port: ${PORT}`));
+    console.log("Connected to MongoDB");
+
+    /* ONLY ADD DATA ONE TIME */
     // AffiliateStat.insertMany(dataAffiliateStat);
     // OverallStat.insertMany(dataOverallStat);
     // Transaction.insertMany(dataTransaction);
     // Product.insertMany(dataProduct);
     // ProductStat.insertMany(dataProductStat);
     // User.insertMany(dataUser);
-
-}).catch((error) => console.log(`${error} did not connect`));
-
+  })
+  .catch((error) => console.log(`${error} did not connect`));
