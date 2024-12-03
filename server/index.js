@@ -1,3 +1,4 @@
+// Import necessary modules
 import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
@@ -5,6 +6,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'path';
+
+// Route imports
 import clientRoutes from "./routes/client.js";
 import generalRoutes from "./routes/general.js";
 import managementRoutes from "./routes/management.js";
@@ -13,10 +17,10 @@ import omanToTZSRoutes from "./routes/omanToTZSRoutes.js";
 import tzsToOMRRoutes from "./routes/tzaToOmanRoutes.js";
 import AccountDetailsOMR from "./routes/AccountDetailsOMR.js";
 import AccountDetailsTZS from "./routes/AccountDetailsTZS.js";
-import  AddBankAccount  from './routes/AddAccount.js';
-import  AddTransection  from './routes/AddTransection.js';
+import AddBankAccount from './routes/AddAccount.js';
+import AddTransection from './routes/AddTransection.js';
 
-// data imports
+// Model imports
 import User from "./models/User.js";
 import Product from "./models/Product.js";
 import ProductStat from './models/ProductStat.js';
@@ -24,33 +28,69 @@ import Transaction from './models/Transaction.js';
 import OverallStat from './models/OverallStat.js';
 import AffiliateStat from './models/AffiliateStat.js';
 
+// Data imports
 import {
-    dataUser, dataProduct, dataProductStat, dataTransaction, dataOverallStat, dataAffiliateStat
-  } from "./data/index.js";
+    dataUser, dataProduct, dataProductStat, dataTransaction, 
+    dataOverallStat, dataAffiliateStat
+} from "./data/index.js";
 
 /* CONFIGURATION */
 dotenv.config();
 const app = express();
+const __dirname = path.resolve();
+
+// Define allowed origins
+const allowedOrigins = [
+    'http://localhost:3000',
+    'https://currency-exchnage-6itw.vercel.app',
+    'https://currency-exchnage-6itw.vercel.app/',
+    'https://currency-exchange.vercel.app',
+    'https://currency-exchange.vercel.app/'
+];
+
+/* MIDDLEWARE */
 app.use(express.json());
 app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({policy: "cross-origin"}));
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// Enhanced CORS configuration
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(null, true); // Allow all origins in development
+        }
+        return callback(null, true);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+// Additional headers
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
+
+// Static file serving
+app.use(express.static(path.join(__dirname, "public")));
 
 /* ROUTES */
 app.get("/", (req, res) => {
-  res.send("Welcome to the E-commerce API");
+    res.send("Welcome to the Currency Exchange API");
 });
 
-
-
+// API routes
 app.use("/client", clientRoutes);
 app.use("/general", generalRoutes);
 app.use("/management", managementRoutes);
-app.use("/sales", salesRoutes); 
-// Use the separate routes
+app.use("/sales", salesRoutes);
 app.use('/omanToTZS', omanToTZSRoutes);
 app.use('/tzsToOMR', tzsToOMRRoutes);
 app.use("/AccountDetailsOMR", AccountDetailsOMR);
@@ -58,22 +98,47 @@ app.use("/AccountDetailsTZS", AccountDetailsTZS);
 app.use("/accounts", AddBankAccount);
 app.use("/transactions", AddTransection);
 
+/* ERROR HANDLING */
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: "Route not found"
+    });
+});
 
- 
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        error: process.env.NODE_ENV === 'development' ? err.message : {}
+    });
+});
+
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 5002;
-mongoose.connect(process.env.MONGO_URL,{useNewUrlParser: true,useUnifiedTopology: true,}).then(() => {
-    app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
-    console.log('Connected to MongoDB');
-     /* ONLY ADD DATA ONE TIME */
-    // AffiliateStat.insertMany(dataAffiliateStat);
-    // OverallStat.insertMany(dataOverallStat);
-    // Transaction.insertMany(dataTransaction);
-    // Product.insertMany(dataProduct);
-    // ProductStat.insertMany(dataProductStat);
-    // User.insertMany(dataUser);
+const MONGO_URL = process.env.MONGO_URL;
 
-}).catch((error) => console.log(`${error} did not connect`));
+if (!MONGO_URL) {
+    console.error('MONGO_URL is not defined in environment variables');
+    process.exit(1);
+}
 
+mongoose.connect(MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server running on Port: ${PORT}`);
+        console.log('Connected to MongoDB');
+    });
+})
+.catch((error) => {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+});
 
 export default app;

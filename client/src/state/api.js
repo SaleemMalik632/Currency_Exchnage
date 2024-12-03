@@ -7,6 +7,7 @@ export const api = createApi({
     "User", "Products", "Customers", "Transactions", "Geography",
     "Sales", "Admins", "Performance", "Dashboard", "Banks", "Transactions", "Expances"
   ],
+
   endpoints: (build) => ({
     getUser: build.query({
       query: (id) => `general/user/${id}`,
