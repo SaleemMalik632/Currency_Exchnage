@@ -4,7 +4,7 @@ import { useTheme } from "@mui/material";
 
 const OverviewChart = ({ data, isLoading, isDashboard = false }) => {
   const theme = useTheme();
-  console.log("data", data);
+  console.log("data here is all the profit ", data);
 
   // List of all months for x-axis
   const allMonths = [
@@ -22,22 +22,23 @@ const OverviewChart = ({ data, isLoading, isDashboard = false }) => {
     "Dec",
   ];
 
-  // Process data, replacing null profits with 0
+  // Process data, replacing null profits with 0 for missing months
   const processedData = useMemo(() => {
     if (!data) return [];
     return allMonths.map((month) => {
-      const monthData = data[0]?.data.find((d) => d.x === month) || { y: null };
+      // Find data for current month
+      const monthData = data[0]?.data?.find(d => d.x === month);
+      const value = monthData?.y;
       return {
         x: month,
-        y: monthData.y !== null ? monthData.y : 0, // Replace null with 0
+        y: isNaN(value) ? 0 : value // Convert NaN to 0
       };
     });
   }, [data]);
 
+  const hasData = processedData.some(d => d.y > 0);
+  console.log("processedData", processedData);
   if (isLoading) return "Loading...";
-
-  // Check if there is no valid data to show
-  const hasData = processedData.some((d) => d.y !== 0);
 
   return hasData ? (
     <ResponsiveLine
@@ -45,7 +46,10 @@ const OverviewChart = ({ data, isLoading, isDashboard = false }) => {
         {
           id: "Profit",
           color: theme.palette.secondary.main,
-          data: processedData,
+          data: processedData.map(d => ({
+            x: d.x,
+            y: isNaN(d.y) ? 0 : d.y // Handle any NaN values
+          }))
         },
       ]}
       theme={{
@@ -126,31 +130,31 @@ const OverviewChart = ({ data, isLoading, isDashboard = false }) => {
       legends={
         !isDashboard
           ? [
-              {
-                anchor: "bottom-right",
-                direction: "column",
-                justify: false,
-                translateX: 30,
-                translateY: -40,
-                itemsSpacing: 0,
-                itemDirection: "left-to-right",
-                itemWidth: 80,
-                itemHeight: 20,
-                itemOpacity: 0.75,
-                symbolSize: 12,
-                symbolShape: "circle",
-                symbolBorderColor: "rgba(0, 0, 0, .5)",
-                effects: [
-                  {
-                    on: "hover",
-                    style: {
-                      itemBackground: "rgba(0, 0, 0, .03)",
-                      itemOpacity: 1,
-                    },
+            {
+              anchor: "bottom-right",
+              direction: "column",
+              justify: false,
+              translateX: 30,
+              translateY: -40,
+              itemsSpacing: 0,
+              itemDirection: "left-to-right",
+              itemWidth: 80,
+              itemHeight: 20,
+              itemOpacity: 0.75,
+              symbolSize: 12,
+              symbolShape: "circle",
+              symbolBorderColor: "rgba(0, 0, 0, .5)",
+              effects: [
+                {
+                  on: "hover",
+                  style: {
+                    itemBackground: "rgba(0, 0, 0, .03)",
+                    itemOpacity: 1,
                   },
-                ],
-              },
-            ]
+                },
+              ],
+            },
+          ]
           : undefined
       }
     />
