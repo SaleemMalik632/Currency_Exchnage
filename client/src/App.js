@@ -36,7 +36,7 @@ function App() {
   },[])
 
 
-  
+
 
 
   return (
@@ -59,6 +59,10 @@ function App() {
             <Route path="/return-transaction" element={<ViewAllCancelaTransections />}/>
             <Route path="/profit-details" element={<ProfitDetails />}/>
 
+
+            {/* testing  */}
+
+            <Route path="/test" element={<Test />}/>
 
 
             <Route path="/products" element={<Products />}/>
