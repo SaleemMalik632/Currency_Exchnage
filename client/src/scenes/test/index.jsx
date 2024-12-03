@@ -7,20 +7,30 @@ const AllApiData = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(
-        "https://server-6zpktt1pb-saleem-maliks-projects.vercel.app/client/products"
-      );
+  // "proxy": "https://server-g60j1fobu-saleem-maliks-projects.vercel.app/",
+      const response = await fetch('https://server-saleem-maliks-projects.vercel.app/transactions/completed', {
+        method: 'GET', // or POST, PUT, etc., as required
+        headers: {
+            'Content-Type': 'application/json',
+        },
+
+    });
       if (!response.ok) {
+        alert(response);
+        
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const result = await response.json();
+      console.log(result);
       setData(result);
     } catch (err) {
       setError(err.message);
+      
     } finally {
       setLoading(false);
     }
-  };
+  }; 
 
   useEffect(() => {
     fetchData();
