@@ -114,6 +114,7 @@ const ProfileCalculation = ({ CheckINCurrancy, bankName }) => {
         // Total OMR spent on buying TZS (TZS to OMR) 
         const myTotalOmaniEnvestment = parseFloat((BuysTZS?.reduce((acc, transaction) => acc + transaction.AmmountCheckout, 0) || 0).toFixed(3));
         setMyTotalOmaniEnvestment(myTotalOmaniEnvestment);
+        console.log('MyTotalOmaniEnvestment:', myTotalOmaniEnvestment);
 
         // total TZS that i bought
         const totalTZSBuy = parseFloat((BuysTZS?.reduce((acc, transaction) => acc + transaction.AmmountCheckin, 0) || 0).toFixed(3));
@@ -122,6 +123,7 @@ const ProfileCalculation = ({ CheckINCurrancy, bankName }) => {
         // Amount after selling TZS
         const revenewAfterSaleOmanitoTZS = parseFloat((SaleTZS?.reduce((acc, transaction) => acc + transaction.AmmountCheckin, 0) || 0).toFixed(3));
         setRevenewAfterSaleOmanitoTZS(revenewAfterSaleOmanitoTZS);
+        console.log("RevenewAfterSaleOmanitoTZS", revenewAfterSaleOmanitoTZS);
 
         // Total TZS sold
         const totalTZSSale = parseFloat((SaleTZS?.reduce((acc, transaction) => acc + transaction.AmmountCheckout, 0) || 0).toFixed(3));

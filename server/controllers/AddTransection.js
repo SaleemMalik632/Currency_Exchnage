@@ -13,12 +13,11 @@ export const addTransaction = async (req, res) => {
 
     // Log the entire request body
     console.log('Request Body:', req.body);
-
-    req.body.AmmountCheckin = parseInt(AmmountCheckin, 10);
-    req.body.transactionFee = parseInt(transactionFee, 10);
-    req.body.AmmountCheckout = parseInt(AmmountCheckout, 10);
-    req.body.RemainingBalanceCheckInBank = parseInt(RemainingBalanceCheckInBank, 10);
-    req.body.RemainingBalanceCheckOutBank = parseInt(RemainingBalanceCheckOutBank, 10);
+    req.body.AmmountCheckin = parseFloat(AmmountCheckin, 10);
+    req.body.transactionFee = parseFloat(transactionFee, 10);
+    req.body.AmmountCheckout = parseFloat(AmmountCheckout, 10);
+    req.body.RemainingBalanceCheckInBank = parseFloat(RemainingBalanceCheckInBank, 10);
+    req.body.RemainingBalanceCheckOutBank = parseFloat(RemainingBalanceCheckOutBank, 10);
 
     if (NameofCheckInCurrency === 'TZS') {
         req.body.transactionFee = 0;

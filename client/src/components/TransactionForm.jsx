@@ -176,19 +176,19 @@ const TransactionForm = ({ CheckINBankCurrency, CheckOutBankCurrency }) => {
   useEffect(() => {
     let totalAmmount = 0;
     if (CheckINBankCurrency === 'Omani') {
-      setAmountInLocalCurrency(amount * yourExchangeRate);
-      totalAmmount = parseInt(amount, 10) + parseInt(transactionFee, 10);
-      setTotalOMR(totalAmmount);
+        setAmountInLocalCurrency((amount * yourExchangeRate).toFixed(3));
+        totalAmmount = parseFloat(amount) + parseFloat(transactionFee);
+        setTotalOMR(totalAmmount.toFixed(3));
     } else if (CheckINBankCurrency === 'TZS') {
-      totalAmmount = Math.floor(amount / yourExchangeRate); // or Math.ceil or Math.round
-      setAmountInLocalCurrency(totalAmmount);
+        totalAmmount = amount / yourExchangeRate;
+        setAmountInLocalCurrency(totalAmmount.toFixed(3));
+        console.log('totalAmmount:', totalAmmount);
     }
     console.log('Totalcashout:', Totalcashout);
     console.log('TotalcashIN:', TotalcashIN);
-    setTotalcheckinAfterTransection(parseInt(TotalcashIN, 10) + parseInt(totalAmmount, 10));
-    setTotalcheckoutAfterTransection(parseInt(Totalcashout, 10) - amountInLocalCurrency);
-  }, [amount, yourExchangeRate, transactionFee, CheckINBankCurrency, TotalcashIN, Totalcashout, amountInLocalCurrency]);
-
+    setTotalcheckinAfterTransection((parseFloat(TotalcashIN) + parseFloat(totalAmmount)).toFixed(3));
+    setTotalcheckoutAfterTransection((parseFloat(Totalcashout) - parseFloat(amountInLocalCurrency)).toFixed(3));
+}, [amount, yourExchangeRate, transactionFee, CheckINBankCurrency, TotalcashIN, Totalcashout, amountInLocalCurrency]);
 
   const refreshTransection = async () => {
     await refetchIN();
