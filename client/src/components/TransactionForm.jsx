@@ -41,7 +41,7 @@ const TransactionForm = ({ CheckINBankCurrency, CheckOutBankCurrency }) => {
   const [receiverPhoneNumber, setReceiverPhoneNumber] = useState('');
   // Payment Information
   const [amount, setAmount] = useState('');
-  const [transactionFee, setTransactionFee] = useState(1);
+  const [transactionFee, setTransactionFee] = useState(0);
   const [yourExchangeRate, setYourExchangeRate] = useState('');
   // Bank Information
   const [cashInBank, setCashInBank] = useState('');
@@ -174,22 +174,29 @@ const TransactionForm = ({ CheckINBankCurrency, CheckOutBankCurrency }) => {
 
 
   useEffect(() => {
+    const formatNumber = (num) => {
+      return parseFloat(num).toString();
+    };
+
     let totalAmmount = 0;
     if (CheckINBankCurrency === 'Omani') {
-        setAmountInLocalCurrency((amount * yourExchangeRate).toFixed(3));
-        totalAmmount = parseFloat(amount) + parseFloat(transactionFee);
-        setTotalOMR(totalAmmount.toFixed(3));
+      setAmountInLocalCurrency(formatNumber((amount * yourExchangeRate).toFixed(3)));
+      totalAmmount = parseFloat(amount) + parseFloat(transactionFee);
+      setTotalOMR(formatNumber(totalAmmount.toFixed(3)));
+      console.log('totalAmmount:', totalAmmount);
     } else if (CheckINBankCurrency === 'TZS') {
-        totalAmmount = amount / yourExchangeRate;
-        setAmountInLocalCurrency(totalAmmount.toFixed(3));
-        console.log('totalAmmount:', totalAmmount);
+      totalAmmount = amount;
+      setAmountInLocalCurrency(formatNumber((amount / yourExchangeRate).toFixed(3)));
+      console.log('totalAmmount:', totalAmmount);
     }
     console.log('Totalcashout:', Totalcashout);
     console.log('TotalcashIN:', TotalcashIN);
-    setTotalcheckinAfterTransection((parseFloat(TotalcashIN) + parseFloat(totalAmmount)).toFixed(3));
-    setTotalcheckoutAfterTransection((parseFloat(Totalcashout) - parseFloat(amountInLocalCurrency)).toFixed(3));
-}, [amount, yourExchangeRate, transactionFee, CheckINBankCurrency, TotalcashIN, Totalcashout, amountInLocalCurrency]);
-
+    setTotalcheckinAfterTransection(formatNumber((parseFloat(TotalcashIN) + parseFloat(totalAmmount)).toFixed(3)));
+    setTotalcheckoutAfterTransection(formatNumber((parseFloat(Totalcashout) - parseFloat(amountInLocalCurrency)).toFixed(3)));
+  }, [amount, yourExchangeRate, transactionFee, CheckINBankCurrency, TotalcashIN, Totalcashout, amountInLocalCurrency]);
+  
+  
+  
   const refreshTransection = async () => {
     await refetchIN();
     await refetchOUT();
@@ -598,7 +605,7 @@ const TransactionForm = ({ CheckINBankCurrency, CheckOutBankCurrency }) => {
                 receiverNumber={invoiceData.receiverPhoneNumber}
                 amountSend={invoiceData.amount}
                 rate={invoiceData.yourExchangeRate}
-                amountReceive={invoiceData.amountInLocalCurrency} 
+                amountReceive={invoiceData.amountInLocalCurrency}
                 chargeFee={invoiceData.transactionFee ?? 0}  // Ensure chargeFee is passed and default to 0 if undefined
                 total={parseFloat(invoiceData.amount) + parseFloat(CheckINBankCurrency === 'TZS' ? 0 : (invoiceData.transactionFee ?? 0))}
               />
